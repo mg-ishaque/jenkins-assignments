@@ -3,3 +3,5 @@ Module 6 - Jenkins Assignment 1
 Objective:
 1. Trigger Jenkins pipeline on develop branch push.
 2. Pull GitHub repository content into a Jenkins folder.
+
+Webhook test: Automatic Jenkins build triggered by GitHub push.
