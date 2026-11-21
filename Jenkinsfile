@@ -1,13 +1,14 @@
 
 pipeline {
-    agent any
+    agent { label 'prod' }
 
     options {
         skipDefaultCheckout(true)
+        disableConcurrentBuilds()
     }
 
     stages {
-        stage('Checkout Git Repository') {
+        stage('Checkout Master Branch') {
             steps {
                 dir('source') {
                     checkout scm
@@ -15,14 +16,18 @@ pipeline {
             }
         }
 
-        stage('Verify Downloaded Files') {
+        stage('Copy Files to Production') {
             steps {
                 sh '''
-                    echo "Assignment 1 - Git Checkout"
-                    pwd
-                    ls -la source/
-                    git -C source branch --show-current
-                    git -C source log -1 --oneline
+                    mkdir -p /home/jenkins/deploy/prod
+
+                    rsync -av --delete \
+                      --exclude='.git/' \
+                      source/ /home/jenkins/deploy/prod/
+
+                    echo "Production deployment completed"
+                    hostname
+                    ls -la /home/jenkins/deploy/prod/
                 '''
             }
         }
@@ -30,10 +35,10 @@ pipeline {
 
     post {
         success {
-            echo 'Assignment 1 completed successfully!'
+            echo 'Push-to-Prod completed successfully!'
         }
         failure {
-            echo 'Assignment 1 failed!'
+            echo 'Push-to-Prod failed!'
         }
     }
 }
