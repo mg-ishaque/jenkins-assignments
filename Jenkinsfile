@@ -1,13 +1,14 @@
 
 pipeline {
-    agent any
+    agent { label 'test' }
 
     options {
         skipDefaultCheckout(true)
+        disableConcurrentBuilds()
     }
 
     stages {
-        stage('Checkout Git Repository') {
+        stage('Checkout Test Branch') {
             steps {
                 dir('source') {
                     checkout scm
@@ -15,14 +16,18 @@ pipeline {
             }
         }
 
-        stage('Verify Downloaded Files') {
+        stage('Copy Files to Test') {
             steps {
                 sh '''
-                    echo "Assignment 1 - Git Checkout"
-                    pwd
-                    ls -la source/
-                    git -C source branch --show-current
-                    git -C source log -1 --oneline
+                    mkdir -p /home/jenkins/deploy/test
+
+                    rsync -av --delete \
+                      --exclude='.git/' \
+                      source/ /home/jenkins/deploy/test/
+
+                    echo "Test deployment completed"
+                    hostname
+                    ls -la /home/jenkins/deploy/test/
                 '''
             }
         }
@@ -30,10 +35,10 @@ pipeline {
 
     post {
         success {
-            echo 'Assignment 1 completed successfully!'
+            echo 'Push-to-Test completed successfully!'
         }
         failure {
-            echo 'Assignment 1 failed!'
+            echo 'Push-to-Test failed!'
         }
     }
 }
