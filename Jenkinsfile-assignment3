@@ -1,0 +1,22 @@
+
+pipeline {
+    agent none
+
+    stages {
+        stage('Test') {
+            steps {
+                build job: 'Push-to-Test',
+                      wait: true,
+                      propagate: true
+            }
+        }
+
+        stage('Production') {
+            steps {
+                build job: 'Push-to-Prod',
+                      wait: true,
+                      propagate: true
+            }
+        }
+    }
+}
